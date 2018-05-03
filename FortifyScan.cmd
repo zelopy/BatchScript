@@ -6,10 +6,10 @@ rem TODO : mbs파일명 규칙 협의 필요
 rem		- 필요정보 : 구분자, IP, Port, Build ID, 프로젝트명, 버전
 
 :: Local PC (개발용)
-call D:\Workspace\TDE-Batch\setEnv.cmd
-:: (개발)
-::call D:\TDE-Batch\setEnv.cmd
-:: (운영)
+::call D:\Workspace\TDE-Batch\setEnv.cmd
+:: SKT-SCFDAP1 (개발)
+call D:\TDE-Batch\setEnv.cmd
+:: SKT-SCCPAP2 (운영)
 ::call D:\TDE-Batch\setEnv.cmd
 
 :: Scan 작업 실행 여부 (y, n)
@@ -51,7 +51,7 @@ if not exist "%LOG_FILE%" (
 :: sourceanalyzer 프로세스가 5개 이상 동작중이라면 보류
 set proccnt=0
 for /f "skip=3" %%x in ('tasklist /FI "IMAGENAME eq sourceanalyzer.exe"') do set /a proccnt=proccnt+1
-echo Total sourceanalyzer.exe tasks running: %proccnt%
+echo 구동중인 sourceanalyzer.exe 갯수 : %proccnt%
 if %proccnt% gtr 4 (
 	echo sourceanalyzer 최대 동작중.. 작업대기
 	echo %TIME% - sourceanalyzer 최대 %proccnt% 동작중.. 작업대기 >> %LOG_FILE%
@@ -80,6 +80,7 @@ echo %TIME% - >> %LOG_FILE%
 
 :: 생성된 지 1일 이상 지난 fpr파일은 점검완료로 판단하고 삭제 처리함
 cd /d %RESULT_DIR%
+set /a this_month=%date:~5,2%
 set today=%date:~8,2%
 
 SETLOCAL ENABLEDELAYEDEXPANSION
@@ -105,12 +106,31 @@ for /r %%j in (*.pdf) do (
 	if exist %%j (
 		:: 생성날짜 확인
 		set tmp=%%~tj
+		set /a createdMonth=!tmp:~5,2!
 		set createdDate=!tmp:~8,2!
 
 		set /a before = %today% - !createdDate!
-		echo !before!
 
 		:: 날짜 비교해서 7일이상 지났다면 삭제
+		if !createdMonth! neq %this_month% (
+			set /a last_day=0
+
+			if not !createdMonth!==2 (
+			    set /a last_day="31 - (!createdMonth! - 1) %% 7 %% 2"
+			) else (
+			    set /a y4="year %% 4" & if !y4!==0 (
+			        set /a y100="year %% 100" & if not !y100!==0 set is_leap_year=1
+			        set /a y400="year %% 400" & if !y400!==0 set is_leap_year=1
+			    )
+			    if "!is_leap_year!"=="1" (set last_day=29) else set last_day=28
+			)
+
+			set /a createdDate = !last_day! - !createdDate!
+			set /a before = %today% + !createdDate!
+		) else (
+			set /a before = %today% - !createdDate!
+		)
+
 		if !before! gtr 6 (
 			del %%j
 			echo %%~nj%%~xj 삭제
@@ -131,8 +151,8 @@ echo BUILD_ID : "%BUILD_ID%"
 echo %TIME% - [%BUILD_ID%] [0] Scan start : %SCAN_TARGET%>> %LOG_FILE%
 
 :: 해당 build 정리
-::sourceanalyzer -b "%BUILD_ID%" -clean
-sourceanalyzer -clean
+sourceanalyzer -b "%BUILD_ID%" -clean
+::sourceanalyzer -clean
 echo [%BUILD_ID%] [1] Build ID "%BUILD_ID%" clean
 echo %TIME% - [%BUILD_ID%] [1] Build ID "%BUILD_ID%" clean>> %LOG_FILE%
 
