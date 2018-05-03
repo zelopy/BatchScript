@@ -7,9 +7,9 @@ rem		- 필요정보 : 구분자, IP, Port, Build ID, 프로젝트명, 버전
 
 :: Local PC (개발용)
 ::call D:\Workspace\TDE-Batch\setEnv.cmd
-:: SKT-SCFDAP1 (개발)
+:: (개발)
 call D:\TDE-Batch\setEnv.cmd
-:: SKT-SCCPAP2 (운영)
+:: (운영)
 ::call D:\TDE-Batch\setEnv.cmd
 
 :: Scan 작업 실행 여부 (y, n)
