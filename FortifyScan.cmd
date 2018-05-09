@@ -2,13 +2,15 @@
 rem 2018.03.23 - 김창현/보안
 rem TDE 서버로부터 전달받은 mbs파일을 찾아 Fortify SCA 점검 수행.
 rem TODO : AP2 서버 환경에 맞게 변수 수정하기
-rem TODO : mbs파일명 규칙 협의 필요
-rem		- 필요정보 : 구분자, IP, Port, Build ID, 프로젝트명, 버전
+rem mbs파일명 규칙 : [ProjectKEY값]_[TimeStamp]_[서버구분 ex> 001].mbs
+rem 서버구분
+rem		001 : TDE
+rem		002 : 
 
 :: Local PC (개발용)
-::call D:\Workspace\TDE-Batch\setEnv.cmd
+call D:\Workspace\TDE-Batch\setEnv.cmd
 :: (개발)
-call D:\TDE-Batch\setEnv.cmd
+::call D:\TDE-Batch\setEnv.cmd
 :: (운영)
 ::call D:\TDE-Batch\setEnv.cmd
 
@@ -16,8 +18,12 @@ call D:\TDE-Batch\setEnv.cmd
 set RUN_SCAN=n
 :: Scan 디렉토리로 이동된 점검대상 mbs파일 (경로+파일명)
 set SCAN_TARGET=
+:: 파일명 (확장자명 제외)
+set FILE_NAME_NOT_EXT=
 :: 점검대상 BUILD ID
 set BUILD_ID=
+set REQ_TIMESTAMP=
+set SERVER_TYPE=
 
 
 :: 업로드된 mbs파일을 찾기 위해 디렉토리 이동
@@ -65,10 +71,17 @@ for /r %%i in (*.mbs) do (
 		echo mbs file exists : %SCAN_DIR%\%%~ni%%~xi
 		echo %TIME% - mbs file exists : %SCAN_DIR%\%%~ni%%~xi >> %LOG_FILE%
 		set RUN_SCAN=y
+		set FILE_NAME_NOT_EXT=%%~ni
 		rem upload 디렉토리 내 mbs 파일 발견 시 scan 디렉토리로 이동
 		move %%i %SCAN_DIR%\%%~ni%%~xi
 		set SCAN_TARGET=%SCAN_DIR%\%%~ni%%~xi
-		set BUILD_ID=%%~ni
+		
+		::set BUILD_ID=%%~ni
+		for /f "DELIMS=_ TOKENS=1,2,3" %%a in ("%%~ni") do (
+			set BUILD_ID=%%a
+			set REQ_TIMESTAMP=%%b
+			set SERVER_TYPE=%%c
+		)
 		:: Scan 단계로 이동
 		goto scanrun
 	)
@@ -162,11 +175,11 @@ echo [%BUILD_ID%] [2] build-session import : "%SCAN_TARGET%"
 echo %TIME% - [%BUILD_ID%] [2] build-session import : "%SCAN_TARGET%">> %LOG_FILE%
 
 :: Fortify scan 수행 & 점검결과 추출
-sourceanalyzer -64 -Xmx8092M -b %BUILD_ID% -disable-source-bundling -scan -f %RESULT_DIR%\%BUILD_ID%.fpr
+sourceanalyzer -64 -Xmx8092M -b %BUILD_ID% -disable-source-bundling -scan -f %RESULT_DIR%\%FILE_NAME_NOT_EXT%.fpr
 echo [%BUILD_ID%] [3] Scan 작업완료
 echo %TIME% - [%BUILD_ID%] [3] Scan 완료>> %LOG_FILE%
-echo [%BUILD_ID%] [4] %BUILD_ID%.fpr create
-echo %TIME% - [%BUILD_ID%] [4] %BUILD_ID%.fpr create>> %LOG_FILE%
+echo [%BUILD_ID%] [4] %FILE_NAME_NOT_EXT%.fpr create
+echo %TIME% - [%BUILD_ID%] [4] %FILE_NAME_NOT_EXT%.fpr create>> %LOG_FILE%
 
 :: scan 디렉토리의 해당 mbs 파일 삭제
 del "%SCAN_TARGET%"
@@ -174,7 +187,7 @@ echo [%BUILD_ID%] [5] "%SCAN_TARGET%" delete
 echo %TIME% - [%BUILD_ID%] [5] "%SCAN_TARGET%" delete>> %LOG_FILE%
 
 :: 점검결과 파일 pdf로 변환
-ReportGenerator -template DeveloperWorkbook.xml -format pdf -f %RESULT_DIR%\%BUILD_ID%.pdf -source %RESULT_DIR%\%BUILD_ID%.fpr
+ReportGenerator -template DeveloperWorkbook.xml -format pdf -f %RESULT_DIR%\%FILE_NAME_NOT_EXT%.pdf -source %RESULT_DIR%\%FILE_NAME_NOT_EXT%.fpr
 ::echo [%BUILD_ID%] [6] "%RESULT_DIR%\%BUILD_ID%".pdf created
 ::echo %TIME% - [%BUILD_ID%] [6] "%RESULT_DIR%\%BUILD_ID%".pdf created>> %LOG_FILE%
 

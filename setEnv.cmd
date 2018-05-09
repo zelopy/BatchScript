@@ -14,11 +14,13 @@ set RESULT_DIR=%WORKSPACE%\result
 
 
 
-
 ::================================================
 
 :: Scan 수행할 mbs파일 저장 경로
 set SCAN_DIR=%WORKSPACE%\scan
+
+:: FTP전송 Script 파일
+set FTP_SCRIPT_FILE=%WORKSPACE%\ftp_script.txt
 
 :: 로그 디렉토리
 set LOG_DIR=%WORKSPACE%\logs
@@ -29,3 +31,20 @@ set LOG_FILE_FTP=%LOG_DIR%\%DATE%-FTP.log
 
 ::================================================
 
+:: TEST(Local PC)
+set TARGET_IP_0=192.168.118.128
+set TARGET_PORT_0=21
+set FTP_ID_0=test
+set FTP_PW_0=test
+
+:: TDE Server
+set TARGET_IP_1=
+set TARGET_PORT_1=
+set FTP_ID_1=
+set FTP_PW_1=
+
+:: C&C Server
+set TARGET_IP_2=
+set TARGET_PORT_2=
+set FTP_ID_2=
+set FTP_PW_2=
