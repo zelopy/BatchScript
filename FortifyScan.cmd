@@ -93,61 +93,56 @@ echo %TIME% - >> %LOG_FILE%
 
 :: 생성된 지 1일 이상 지난 fpr파일은 점검완료로 판단하고 삭제 처리함
 cd /d %RESULT_DIR%
-set /a this_month=%date:~5,2%
-set today=%date:~8,2%
+set /a thisMonth=%date:~5,2%
+set /a today=%date:~8,2%
+
+set ten1=%thisMonth:~0,1%
+set ten2=%today:~0,1%
+if %ten1% == 0 set thisMonth=%thisMonth:~1,1%
+if %ten2% == 0 set today=%today:~1,1%
+
+echo thisMonth : %thisMonth%
+echo today : %today%
 
 SETLOCAL ENABLEDELAYEDEXPANSION
+
 for /r %%i in (*.fpr) do (
 	if exist %%i (
 		:: 생성날짜 확인
 		set tmp=%%~ti
 		set createdDate=!tmp:~8,2!
+		set createdDateTmp=!createdDate:~0,1!
+		echo createdDate : !createdDate!
 
-		set /a before = %today% - !createdDate!
-		echo !before!
+		echo 11111
 
-		:: 날짜 비교해서 1일이상 지났다면 삭제
-		if !before! gtr 0 (
+		echo createdDateTmp : !createdDateTmp!
+		if !createdDateTmp! == 0 set createdDate=!tmp:~9,1!
+		echo createdDate : !createdDate!
+
+		if %today% neq !createdDate! (
 			del %%i
 			echo %%~ni%%~xi 삭제
 			echo %TIME% - %%~ni%%~xi 삭제>> %LOG_FILE%
 		)
 	)
 )
-:: 생성된 지 7일일 이상 지난 pdf파일은 삭제 처리함
-for /r %%j in (*.pdf) do (
-	if exist %%j (
-		:: 생성날짜 확인
-		set tmp=%%~tj
-		set /a createdMonth=!tmp:~5,2!
-		set createdDate=!tmp:~8,2!
+:: 오늘 날짜가 7일 이후라면, 이전월의 pdf파일 전부 삭제 => 최소 7일이상 경과된 걸로 볼 수 있음
+if %today% gtr 7 (
+	for /r %%j in (*.pdf) do (
+		if exist %%j (
+			set tmp=%%~tj
+			set createdMonth=!tmp:~5,2!
+			set createdMonthTmp=!createdMonth:~0,1!
+			if !createdMonthTmp! == 0 set createdMonth=!tmp:~6,1!
 
-		set /a before = %today% - !createdDate!
+			echo %thisMonth% : !createdMonth!
 
-		:: 날짜 비교해서 7일이상 지났다면 삭제
-		if !createdMonth! neq %this_month% (
-			set /a last_day=0
-
-			if not !createdMonth!==2 (
-			    set /a last_day="31 - (!createdMonth! - 1) %% 7 %% 2"
-			) else (
-			    set /a y4="year %% 4" & if !y4!==0 (
-			        set /a y100="year %% 100" & if not !y100!==0 set is_leap_year=1
-			        set /a y400="year %% 400" & if !y400!==0 set is_leap_year=1
-			    )
-			    if "!is_leap_year!"=="1" (set last_day=29) else set last_day=28
+			if %thisMonth% neq !createdMonth! (
+				del %%j
+				echo %%~nj%%~xj 삭제
+				echo %TIME% - %%~nj%%~xj 삭제>> %LOG_FILE%
 			)
-
-			set /a createdDate = !last_day! - !createdDate!
-			set /a before = %today% + !createdDate!
-		) else (
-			set /a before = %today% - !createdDate!
-		)
-
-		if !before! gtr 6 (
-			del %%j
-			echo %%~nj%%~xj 삭제
-			echo %TIME% - %%~nj%%~xj 삭제>> %LOG_FILE%
 		)
 	)
 )
