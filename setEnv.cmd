@@ -13,6 +13,31 @@ set UPLOAD_DIR=%WORKSPACE%\upload
 set RESULT_DIR=%WORKSPACE%\result
 
 
+::================================================
+:: (개발서버 환경설정) ===============
+::================================================
+:: 기본 디렉토리
+::set WORKSPACE=D:\TDE-Batch
+
+:: TDE로부터 업로드 된 점검대상 mbs파일 저장 경로
+::set UPLOAD_DIR=D:\FTP_HOME\tde\upload
+
+:: 점검결과 pdf 파일 저장 경로
+::set RESULT_DIR=D:\FTP_HOME\tde\result
+
+
+::================================================
+:: (운영서버 환경설정) =============
+::================================================
+:: 기본 디렉토리
+::set WORKSPACE=D:\TDE-Batch
+
+:: TDE로부터 업로드 된 점검대상 mbs파일 저장 경로
+::set UPLOAD_DIR=D:\FTPhome\tde\upload
+
+:: 점검결과 pdf 파일 저장 경로
+::set RESULT_DIR=D:\FTPhome\tde\result
+
 
 ::================================================
 
