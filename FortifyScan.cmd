@@ -169,8 +169,13 @@ sourceanalyzer -import-build-session "%SCAN_TARGET%"
 echo [%BUILD_ID%] [2] build-session import : "%SCAN_TARGET%"
 echo %TIME% - [%BUILD_ID%] [2] build-session import : "%SCAN_TARGET%">> %LOG_FILE%
 
+if not exist "%RESULT_DIR%\%SERVER_TYPE%" (
+	mkdir "%RESULT_DIR%\%SERVER_TYPE%"
+	echo "%RESULT_DIR%\%SERVER_TYPE%" directory create
+)
+
 :: Fortify scan 수행 & 점검결과 추출
-sourceanalyzer -64 -Xmx8092M -b %BUILD_ID% -disable-source-bundling -scan -f %RESULT_DIR%\%FILE_NAME_NOT_EXT%.fpr
+sourceanalyzer -64 -Xmx8092M -b %BUILD_ID% -disable-source-bundling -scan -f %RESULT_DIR%\%SERVER_TYPE%\%FILE_NAME_NOT_EXT%.fpr
 echo [%BUILD_ID%] [3] Scan 작업완료
 echo %TIME% - [%BUILD_ID%] [3] Scan 완료>> %LOG_FILE%
 echo [%BUILD_ID%] [4] %FILE_NAME_NOT_EXT%.fpr create
@@ -182,7 +187,7 @@ echo [%BUILD_ID%] [5] "%SCAN_TARGET%" delete
 echo %TIME% - [%BUILD_ID%] [5] "%SCAN_TARGET%" delete>> %LOG_FILE%
 
 :: 점검결과 파일 pdf로 변환
-ReportGenerator -template DeveloperWorkbook.xml -format pdf -f %RESULT_DIR%\%FILE_NAME_NOT_EXT%.pdf -source %RESULT_DIR%\%FILE_NAME_NOT_EXT%.fpr
+ReportGenerator -template DeveloperWorkbook.xml -format pdf -f %RESULT_DIR%\%FILE_NAME_NOT_EXT%.pdf -source %RESULT_DIR%\%SERVER_TYPE%\%FILE_NAME_NOT_EXT%.fpr
 ::echo [%BUILD_ID%] [6] "%RESULT_DIR%\%BUILD_ID%".pdf created
 ::echo %TIME% - [%BUILD_ID%] [6] "%RESULT_DIR%\%BUILD_ID%".pdf created>> %LOG_FILE%
 
