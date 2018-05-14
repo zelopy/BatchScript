@@ -187,7 +187,7 @@ echo [%BUILD_ID%] [5] "%SCAN_TARGET%" delete
 echo %TIME% - [%BUILD_ID%] [5] "%SCAN_TARGET%" delete>> %LOG_FILE%
 
 :: 점검결과 파일 pdf로 변환
-ReportGenerator -template DeveloperWorkbook.xml -format pdf -f %RESULT_DIR%\%FILE_NAME_NOT_EXT%.pdf -source %RESULT_DIR%\%SERVER_TYPE%\%FILE_NAME_NOT_EXT%.fpr
+ReportGenerator -template DeveloperWorkbook.xml -format pdf -f %RESULT_DIR%\%SERVER_TYPE%\%FILE_NAME_NOT_EXT%.pdf -source %RESULT_DIR%\%SERVER_TYPE%\%FILE_NAME_NOT_EXT%.fpr
 ::echo [%BUILD_ID%] [6] "%RESULT_DIR%\%BUILD_ID%".pdf created
 ::echo %TIME% - [%BUILD_ID%] [6] "%RESULT_DIR%\%BUILD_ID%".pdf created>> %LOG_FILE%
 
