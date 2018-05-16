@@ -1,7 +1,7 @@
 @echo off
 
 :: Local PC (개발용)
-call D:\Workspace\TDE-Batch\setEnv.cmd
+call D:\TDE-Batch\setEnv.cmd
 :: (개발)
 ::call D:\TDE-Batch\setEnv.cmd
 :: (운영)
